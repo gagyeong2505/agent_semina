@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 에이전트 오케스트레이션 | 수업 교안</title>
+  <meta name="description" content="Claude Code로 배우는 AI 에이전트 오케스트레이션과 업무 효율화 — 대전지점 김가경 강사 수업 교안">
+  <script>document.documentElement.classList.add('js')</script>
+
+  <!-- Fonts: 본문 Pretendard / 제목 Paperlogy / 영문 Google Sans Flex -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="vendor/lenis.css">
+
+  <style>
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2') format('woff2');
+      font-weight: 600; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2');
+      font-weight: 800; font-display: swap;
+    }
+
+    :root {
+      --ink: #0b0b0b;
+      --paper: #ffffff;
+      --mute: #8a8a8a;
+      --line: #e6e6e6;
+      --soft: #f5f5f3;
+      --accent: #ff5a1f;
+      /* 영문 글리프는 Google Sans Flex, 한글은 각 폰트로 자연스럽게 폴백 */
+      --font-body: 'Google Sans Flex', 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+      --font-head: 'Google Sans Flex', 'Paperlogy', 'Pretendard Variable', sans-serif;
+      --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+      --gutter: clamp(16px, 4vw, 56px);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--paper);
+      -webkit-font-smoothing: antialiased;
+      word-break: keep-all;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 800; margin: 0; line-height: 1.15; letter-spacing: -0.02em; }
+    p { margin: 0; }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    ::selection { background: var(--accent); color: #fff; }
+
+    /* ---------- Splash ---------- */
+    .splash {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--ink); color: #fff;
+      display: none; flex-direction: column; justify-content: space-between;
+      padding: var(--gutter);
+    }
+    .js .splash { display: flex; }
+    .splash__top, .splash__bottom { display: flex; justify-content: space-between; align-items: flex-end; font-size: 14px; color: #9a9a9a; }
+    .splash__count { font-family: var(--font-head); font-size: clamp(64px, 14vw, 200px); font-weight: 800; line-height: .9; color: #fff; font-variant-numeric: tabular-nums; }
+    .splash__bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+
+    /* ---------- Header ---------- */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px var(--gutter);
+      color: #fff; mix-blend-mode: difference;
+      font-size: 14px; font-weight: 600;
+    }
+    .header__logo { text-decoration: none; letter-spacing: -0.01em; }
+    .header nav { display: flex; gap: 28px; }
+    .header nav a { text-decoration: none; opacity: .75; transition: opacity .3s; }
+    .header nav a:hover { opacity: 1; }
+    .progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); z-index: 60; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative; min-height: 100svh;
+      background: var(--ink); color: #fff;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 96px var(--gutter) var(--gutter);
+      overflow: hidden;
+    }
+    .hero__meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; font-size: 14px; color: #a3a3a3; max-width: 900px; }
+    .hero__meta strong { display: block; color: #fff; font-weight: 600; }
+    .hero__kicker { font-size: clamp(16px, 1.6vw, 22px); color: #cfcfcf; margin-bottom: 2vh; }
+    .hero__kicker b { color: #fff; font-weight: 700; }
+    .hero__title {
+      font-family: 'Google Sans Flex', sans-serif;
+      font-weight: 700; font-size: clamp(52px, 11.2vw, 210px);
+      line-height: .92; letter-spacing: -0.045em;
+    }
+    .hero__title .line { display: flex; justify-content: space-between; align-items: baseline; gap: 4vw; }
+    .hero__title small { font-size: .42em; font-weight: 600; letter-spacing: -0.03em; color: #fff; }
+    .hero__scroll { position: absolute; right: var(--gutter); top: 50%; font-size: 12px; color: #8a8a8a; writing-mode: vertical-rl; letter-spacing: .2em; }
+
+    /* ---------- Onboarding (dark) ---------- */
+    .onboard { background: var(--ink); color: #fff; padding: 18vh var(--gutter) 16vh; }
+    .onboard__head { font-size: clamp(40px, 6vw, 96px); color: #8f8f8f; font-family: 'Google Sans Flex', sans-serif; font-weight: 600; letter-spacing: -0.04em; }
+    .onboard__quote {
+      margin: 8vh 0 0 auto; max-width: 860px;
+      font-family: var(--font-head); font-weight: 800;
+      font-size: clamp(28px, 3.6vw, 54px); line-height: 1.3; letter-spacing: -0.02em;
+      position: relative;
+    }
+    .onboard__quote::before { content: "\201C"; position: absolute; left: -.6em; top: -.15em; color: #3a3a3a; font-size: 1.6em; }
+    .onboard__steps { margin-top: 16vh; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #2a2a2a; }
+    .ob-step { padding: 36px 32px 8px 0; border-right: 1px solid #2a2a2a; }
+    .ob-step + .ob-step { padding-left: 32px; }
+    .ob-step:last-child { border-right: 0; }
+    .ob-step__no { font-size: 13px; color: var(--accent); font-weight: 700; letter-spacing: .08em; }
+    .ob-step h3 { font-size: clamp(24px, 2.4vw, 34px); margin: 18px 0 12px; }
+    .ob-step p { color: #a8a8a8; font-size: 16px; }
+
+    /* ---------- Generic section ---------- */
+    .section { padding: 18vh var(--gutter); border-top: 1px solid var(--line); }
+    .section__label { display: flex; gap: 14px; align-items: baseline; font-size: 14px; font-weight: 600; color: var(--mute); margin-bottom: 28px; }
+    .section__label span { color: var(--accent); }
+    .section__title { font-size: clamp(36px, 5.4vw, 84px); max-width: 16ch; }
+    .section__lead { margin-top: 28px; max-width: 640px; font-size: clamp(17px, 1.4vw, 20px); color: #444; }
+    .split-line { overflow: hidden; }
+
+    /* Instructor */
+    .instructor { display: grid; grid-template-columns: minmax(260px, 420px) 1fr; gap: clamp(32px, 6vw, 96px); align-items: end; margin-top: 10vh; }
+    .instructor__photo { position: relative; overflow: hidden; border-radius: 4px; aspect-ratio: 689 / 886; background: var(--soft); }
+    .instructor__photo img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); }
+    .instructor__photo .cover { position: absolute; inset: 0; background: var(--ink); transform-origin: top; }
+    .instructor__branch { font-size: 15px; font-weight: 600; color: var(--mute); }
+    .instructor__name { font-size: clamp(56px, 8vw, 128px); margin: 10px 0 24px; letter-spacing: -0.04em; }
+    .instructor__name em { font-style: normal; font-size: .32em; color: var(--mute); margin-left: .4em; letter-spacing: 0; font-weight: 600; }
+    .instructor__role { font-size: 18px; max-width: 520px; color: #444; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
+    .tag { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; color: #333; }
+
+    /* Agent */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; margin-top: 10vh; border-top: 1px solid var(--ink); }
+    .compare__col { padding: 40px 40px 40px 0; }
+    .compare__col + .compare__col { padding: 40px 0 40px 40px; border-left: 1px solid var(--line); }
+    .compare__en { font-size: 14px; color: var(--mute); font-weight: 600; }
+    .compare__col h3 { font-size: clamp(28px, 2.8vw, 40px); margin: 6px 0 16px; }
+    .compare__col p { color: #444; }
+    .compare__who { margin-top: 20px; font-size: 15px; font-weight: 600; }
+    .compare__who b { color: var(--accent); }
+
+    .subhead { margin-top: 14vh; font-size: clamp(26px, 2.8vw, 40px); }
+    .subhead + .section__lead { margin-top: 14px; }
+
+    .blocks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+    .block { background: var(--soft); border-radius: 4px; padding: 32px; }
+    .block__en { font-size: 13px; color: var(--mute); font-weight: 600; }
+    .block h4 { font-size: 24px; margin: 6px 0 10px; }
+    .block p { font-size: 15px; color: #555; }
+
+    .loop { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 48px; position: relative; }
+    .loop__track { position: absolute; top: 15px; left: 0; right: 0; height: 1px; background: var(--line); }
+    .loop__fill { position: absolute; top: 15px; left: 0; height: 1px; width: 100%; background: var(--ink); transform-origin: left; }
+    .loop__item { position: relative; padding-right: 20px; }
+    .loop__dot { width: 31px; height: 31px; border-radius: 50%; background: var(--paper); border: 1px solid var(--ink); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+    .loop__item h4 { font-size: 20px; margin: 20px 0 8px; }
+    .loop__item p { font-size: 15px; color: #555; }
+
+    .patterns { margin-top: 48px; border-top: 1px solid var(--ink); }
+    .pattern { display: grid; grid-template-columns: 64px minmax(200px, 320px) 1fr; gap: 24px; padding: 26px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+    .pattern__no { font-size: 14px; color: var(--mute); font-weight: 600; }
+    .pattern h4 { font-size: 22px; }
+    .pattern h4 small { display: block; font-family: 'Google Sans Flex', sans-serif; font-size: 14px; font-weight: 500; color: var(--mute); margin-top: 4px; letter-spacing: 0; }
+    .pattern p { color: #444; font-size: 16px; }
+    .pattern.is-key { background: var(--ink); color: #fff; padding-left: 24px; padding-right: 24px; margin: 0 -24px; border-radius: 4px; border-bottom-color: transparent; }
+    .pattern.is-key p, .pattern.is-key .pattern__no, .pattern.is-key h4 small { color: #bdbdbd; }
+    .pattern.is-key .badge { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--ink); background: var(--accent); padding: 3px 10px; border-radius: 999px; }
+
+    .principles { margin-top: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line); }
+    .principle { padding: 28px 28px 0 0; }
+    .principle + .principle { padding-left: 28px; border-left: 1px solid var(--line); }
+    .principle b { font-family: 'Google Sans Flex', sans-serif; font-size: 13px; color: var(--accent); }
+    .principle h4 { font-size: 22px; margin: 8px 0; }
+    .principle p { font-size: 15px; color: #555; }
+
+    .source { margin-top: 48px; font-size: 13px; color: var(--mute); }
+    .source a { text-underline-offset: 3px; }
+
+    /* Overview */
+    .stages { margin-top: 10vh; border-top: 1px solid var(--ink); }
+    .stage { display: grid; grid-template-columns: 110px minmax(180px, 1fr) 2fr 1.4fr; gap: 24px; padding: 30px 0; border-bottom: 1px solid var(--line); align-items: baseline; position: relative; }
+    .stage__head { font-size: 13px; color: var(--mute); font-weight: 600; }
+    .stage--head { padding: 14px 0; }
+    .stage__no { font-family: 'Google Sans Flex', sans-serif; font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+    .stage h4 { font-size: 22px; }
+    .stage h4 small { display: block; font-family: 'Google Sans Flex', sans-serif; font-weight: 500; font-size: 13px; color: var(--mute); margin-top: 6px; letter-spacing: .02em; text-transform: uppercase; }
+    .stage__desc { color: #444; font-size: 16px; }
+    .stage__out { font-size: 15px; color: #222; padding-left: 16px; border-left: 2px solid var(--accent); }
+    .stage.is-key .stage__no { color: var(--accent); }
+
+    /* Install */
+    .os-tabs { display: inline-flex; margin-top: 10vh; border: 1px solid var(--ink); border-radius: 999px; padding: 4px; position: relative; }
+    .os-tabs button {
+      position: relative; z-index: 1; border: 0; background: none; cursor: pointer;
+      font: 600 15px var(--font-body); padding: 10px 26px; border-radius: 999px; color: var(--ink);
+      transition: color .4s var(--ease);
+    }
+    .os-tabs button[aria-selected="true"] { color: #fff; }
+    .os-tabs__pill { position: absolute; top: 4px; bottom: 4px; left: 4px; background: var(--ink); border-radius: 999px; transition: transform .5s var(--ease), width .5s var(--ease); }
+
+    .os-panel { margin-top: 40px; }
+    .os-panel[hidden] { display: none; }
+    .req { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: #555; margin-bottom: 32px; }
+    .req b { color: var(--ink); }
+    .cmds { display: grid; gap: 14px; }
+    .cmd { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+    .cmd__top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; }
+    .cmd__title { font-weight: 700; font-size: 16px; }
+    .cmd__title .rec { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: 2px; }
+    .cmd__title small { display: block; font-weight: 500; font-size: 14px; color: var(--mute); margin-top: 2px; }
+    .cmd pre { margin: 0; background: var(--ink); color: #f2f2f2; padding: 20px; font: 15px/1.6 var(--font-mono); overflow-x: auto; }
+    .cmd pre .p { color: #6f6f6f; user-select: none; }
+    .copy {
+      flex-shrink: 0; border: 1px solid var(--ink); background: var(--paper); border-radius: 999px;
+      font: 600 13px var(--font-body); padding: 7px 16px; cursor: pointer; transition: background .3s, color .3s;
+    }
+    .copy:hover, .copy.is-done { background: var(--ink); color: #fff; }
+
+    .after { margin-top: 12vh; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .after .block pre { margin: 14px 0 0; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; font: 14px/1.6 var(--font-mono); overflow-x: auto; }
+    .note { margin-top: 32px; font-size: 14px; color: #555; background: var(--soft); border-radius: 4px; padding: 18px 22px; }
+
+    /* ---------- Footer ---------- */
+    .footer { background: var(--ink); color: #fff; padding: 16vh var(--gutter) var(--gutter); overflow: hidden; }
+    .footer__msg { font-family: var(--font-head); font-size: clamp(28px, 4vw, 60px); font-weight: 800; max-width: 18ch; line-height: 1.25; }
+    .footer__flow { margin-top: 32px; color: #a8a8a8; font-size: 17px; }
+    .footer__flow b { color: #fff; }
+    .footer__mark { margin-top: 14vh; font-family: 'Google Sans Flex', sans-serif; font-weight: 700; font-size: clamp(44px, 10.5vw, 200px); line-height: .9; letter-spacing: -0.045em; display: flex; justify-content: space-between; gap: 4vw; }
+    .footer__bottom { margin-top: 32px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #8a8a8a; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+      .header nav { display: none; }
+      .hero__meta { grid-template-columns: 1fr 1fr; }
+      .hero__meta div:last-child { display: none; }
+      .hero__scroll { display: none; }
+      .onboard__steps, .blocks, .principles, .after { grid-template-columns: 1fr; }
+      .ob-step, .ob-step + .ob-step { padding: 28px 0; border-right: 0; border-bottom: 1px solid #2a2a2a; }
+      .principle, .principle + .principle { padding: 24px 0; border-left: 0; border-bottom: 1px solid var(--line); }
+      .instructor { grid-template-columns: 1fr; }
+      .instructor__photo { max-width: 380px; }
+      .compare { grid-template-columns: 1fr; }
+      .compare__col, .compare__col + .compare__col { padding: 32px 0; border-left: 0; }
+      .compare__col + .compare__col { border-top: 1px solid var(--line); }
+      .loop { grid-template-columns: 1fr; gap: 28px; }
+      .loop__track, .loop__fill { display: none; }
+      .pattern { grid-template-columns: 40px 1fr; }
+      .pattern p { grid-column: 2; }
+      .stage { grid-template-columns: 56px 1fr; gap: 10px 16px; }
+      .stage--head { display: none; }
+      .stage__no { font-size: 28px; }
+      .stage__desc, .stage__out { grid-column: 2; }
+      .onboard__quote::before { display: none; }
+      .cmd__top { flex-wrap: wrap; }
+      .footer__mark { flex-direction: column; font-size: clamp(44px, 15vw, 110px); }
+      .hero__title .line { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .js .splash { display: none; }
+      .instructor__photo .cover { display: none; }
+      .instructor__photo img { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 0. Splash -->
+  <div class="splash" aria-hidden="true">
+    <div class="splash__top"><span>AI Agent Orchestration</span><span>Seminar ©2026</span></div>
+    <div class="splash__bottom">
+      <span>내 업무를 나누면,<br>AI가 함께 일한다</span>
+      <span class="splash__count">000</span>
+    </div>
+    <i class="splash__bar"></i>
+  </div>
+
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="header">
+    <a href="#top" class="header__logo">Agent Orchestration</a>
+    <nav aria-label="섹션 이동">
+      <a href="#instructor">강사 소개</a>
+      <a href="#agent">에이전트란</a>
+      <a href="#overview">수업 개요</a>
+      <a href="#install">설치</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero / Onboarding -->
+    <section class="hero" aria-label="주제 소개">
+      <div class="hero__meta">
+        <div><strong>Topic</strong>AI 에이전트 오케스트레이션</div>
+        <div><strong>Tool</strong>Claude Code</div>
+        <div><strong>Instructor</strong>대전지점 김가경</div>
+      </div>
+      <span class="hero__scroll">SCROLL</span>
+      <div>
+        <p class="hero__kicker"><b>내 업무를 나누면, AI가 함께 일한다</b> — Claude Code로 배우는 에이전트 오케스트레이션</p>
+        <h1 class="hero__title">
+          <span class="line split-line"><span class="hero__word">AI Agent</span><small class="hero__word">©2026</small></span>
+          <span class="line split-line"><span class="hero__word">Orchestration</span></span>
+        </h1>
+      </div>
+    </section>
+
+    <section class="onboard" aria-label="온보딩">
+      <h2 class="onboard__head">Before we start</h2>
+      <p class="onboard__quote" data-scrub>일정 확인부터 문서 작성, 검수, 메일 전송까지. 반복되는 업무를 AI에게 나누어 맡기고, 사람은 기준을 세우고 최종 판단을 내립니다.</p>
+
+      <div class="onboard__steps">
+        <article class="ob-step" data-reveal>
+          <span class="ob-step__no">STEP 01</span>
+          <h3>업무를 나눈다</h3>
+          <p>입력 자료, 담당 역할, 실행 순서, 산출물, 완료 기준으로 쪼갭니다.</p>
+        </article>
+        <article class="ob-step" data-reveal>
+          <span class="ob-step__no">STEP 02</span>
+          <h3>역할을 맡긴다</h3>
+          <p>문서 작성 에이전트와 검수 에이전트에게 각자의 일을 위임합니다.</p>
+        </article>
+        <article class="ob-step" data-reveal>
+          <span class="ob-step__no">STEP 03</span>
+          <h3>사람이 확인한다</h3>
+          <p>불확실한 정보와 발송 전 수신자·첨부를 사람이 최종 확인합니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 1. 강사 소개 -->
+    <section class="section" id="instructor">
+      <div class="section__label"><span>01</span>Instructor</div>
+      <h2 class="section__title" data-lines>강사 소개</h2>
+
+      <div class="instructor">
+        <div class="instructor__photo">
+          <img src="assets/instructor.jpg" alt="김가경 강사 프로필 사진" width="689" height="886" loading="lazy">
+          <i class="cover" hidden></i>
+        </div>
+        <div>
+          <p class="instructor__branch" data-reveal>대전지점</p>
+          <h3 class="instructor__name" data-reveal>김가경<em>강사</em></h3>
+          <p class="instructor__role" data-reveal>Claude Code로 반복되는 사무 업무를 AI 에이전트 팀에 나누어 맡기는 방법을 함께 실습합니다.</p>
+          <div class="tags" data-reveal>
+            <span class="tag">AI 에이전트</span>
+            <span class="tag">오케스트레이션</span>
+            <span class="tag">Claude Code</span>
+            <span class="tag">업무 자동화</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 에이전트란 -->
+    <section class="section" id="agent">
+      <div class="section__label"><span>02</span>What is an Agent</div>
+      <h2 class="section__title" data-lines>에이전트란 무엇인가</h2>
+      <p class="section__lead" data-reveal>Anthropic은 LLM이 도구와 함께 일하는 시스템을 통틀어 <b>에이전틱 시스템</b>이라 부르고, 그 흐름을 <b>누가 정하느냐</b>에 따라 워크플로와 에이전트로 나눕니다.</p>
+
+      <div class="compare">
+        <div class="compare__col" data-reveal>
+          <span class="compare__en">Workflow</span>
+          <h3>워크플로</h3>
+          <p>LLM과 도구가 미리 정해 둔 코드 경로를 따라 움직입니다. 단계와 순서가 고정되어 있어 예측 가능하고 안정적입니다.</p>
+          <p class="compare__who">흐름을 정하는 주체 → <b>사람(개발자)</b></p>
+        </div>
+        <div class="compare__col" data-reveal>
+          <span class="compare__en">Agent</span>
+          <h3>에이전트</h3>
+          <p>LLM이 스스로 작업 과정과 도구 사용을 결정합니다. 결과를 보고 다음 행동을 고르며 목표를 향해 나아갑니다.</p>
+          <p class="compare__who">흐름을 정하는 주체 → <b>모델(AI)</b></p>
+        </div>
+      </div>
+
+      <h3 class="subhead" data-lines>기본 블록: 증강된 LLM</h3>
+      <p class="section__lead" data-reveal>에이전트의 출발점은 LLM에 세 가지 능력을 붙인 것입니다. 모델은 무엇을 찾고, 어떤 도구를 쓰고, 무엇을 기억할지 스스로 고릅니다.</p>
+      <div class="blocks">
+        <div class="block" data-reveal><span class="block__en">Retrieval</span><h4>검색</h4><p>필요한 자료를 직접 찾아 읽습니다. 예: 업무 목록, 지난 회의록</p></div>
+        <div class="block" data-reveal><span class="block__en">Tools</span><h4>도구</h4><p>캘린더 조회, 파일 작성, 메일 발송처럼 실제 행동을 수행합니다. MCP로 연결합니다.</p></div>
+        <div class="block" data-reveal><span class="block__en">Memory</span><h4>메모리</h4><p>프로젝트 지침과 규칙, 이전 결과를 기억하고 다음 작업에 활용합니다.</p></div>
+      </div>
+
+      <h3 class="subhead" data-lines>에이전트는 이렇게 일합니다</h3>
+      <p class="section__lead" data-reveal>핵심은 단순합니다. 환경의 피드백을 보며 도구를 쓰는 LLM이 <b>루프</b>를 도는 구조입니다.</p>
+      <div class="loop">
+        <i class="loop__track"></i><i class="loop__fill"></i>
+        <div class="loop__item" data-reveal><span class="loop__dot">1</span><h4>목표 받기</h4><p>사람의 요청으로 작업을 시작합니다.</p></div>
+        <div class="loop__item" data-reveal><span class="loop__dot">2</span><h4>계획</h4><p>무엇을 어떤 순서로 할지 스스로 정합니다.</p></div>
+        <div class="loop__item" data-reveal><span class="loop__dot">3</span><h4>도구 실행</h4><p>파일을 읽고, 쓰고, 서비스를 호출합니다.</p></div>
+        <div class="loop__item" data-reveal><span class="loop__dot">4</span><h4>결과 확인</h4><p>실행 결과로 진행 상황을 판단하고 필요하면 사람에게 묻습니다.</p></div>
+        <div class="loop__item" data-reveal><span class="loop__dot">5</span><h4>반복 · 종료</h4><p>완료 기준을 채우거나 중단 조건에 닿으면 멈춥니다.</p></div>
+      </div>
+
+      <h3 class="subhead" data-lines>그리고 오케스트레이션</h3>
+      <p class="section__lead" data-reveal>여러 작업과 에이전트가 <b>어떤 순서와 기준으로 협업할지 조율</b>하는 것이 오케스트레이션입니다. Anthropic이 정리한 대표 패턴은 다섯 가지입니다.</p>
+      <div class="patterns">
+        <div class="pattern" data-reveal><span class="pattern__no">01</span><h4>프롬프트 체이닝<small>Prompt chaining</small></h4><p>작업을 고정된 단계로 나누고 앞 단계의 결과를 다음 단계에 넘깁니다.</p></div>
+        <div class="pattern" data-reveal><span class="pattern__no">02</span><h4>라우팅<small>Routing</small></h4><p>입력을 먼저 분류한 뒤 알맞은 전문 처리로 보냅니다.</p></div>
+        <div class="pattern" data-reveal><span class="pattern__no">03</span><h4>병렬화<small>Parallelization</small></h4><p>독립적인 작업을 동시에 실행하고 결과를 합칩니다.</p></div>
+        <div class="pattern is-key" data-reveal><span class="pattern__no">04</span><h4>오케스트레이터-워커<small>Orchestrator-workers</small></h4><p>중앙의 LLM이 작업을 그때그때 나누어 워커에게 맡기고 결과를 종합합니다. 필요한 하위 작업을 미리 알 수 없을 때 씁니다.<br><span class="badge">오늘 실습: 메인 Claude + 작성·검수 서브에이전트</span></p></div>
+        <div class="pattern" data-reveal><span class="pattern__no">05</span><h4>평가자-최적화<small>Evaluator-optimizer</small></h4><p>한쪽이 만들고 다른 쪽이 평가·피드백하는 과정을 반복해 품질을 높입니다.</p></div>
+      </div>
+
+      <h3 class="subhead" data-lines>좋은 에이전트의 세 가지 원칙</h3>
+      <div class="principles">
+        <div class="principle" data-reveal><b>Simplicity</b><h4>단순하게</h4><p>가장 단순한 방법으로 시작하고, 복잡도는 필요할 때만 높입니다.</p></div>
+        <div class="principle" data-reveal><b>Transparency</b><h4>투명하게</h4><p>에이전트의 계획과 진행 단계를 눈에 보이게 드러냅니다.</p></div>
+        <div class="principle" data-reveal><b>ACI</b><h4>도구를 정교하게</h4><p>에이전트가 쓰는 도구의 설명과 사용법을 명확히 문서화하고 테스트합니다.</p></div>
+      </div>
+
+      <p class="source">출처: Anthropic, <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a> (2024). 수업용으로 요약·재구성했습니다.</p>
+    </section>
+
+    <!-- 3. 수업 개요 -->
+    <section class="section" id="overview">
+      <div class="section__label"><span>03</span>Overview</div>
+      <h2 class="section__title" data-lines>수업 개요</h2>
+      <p class="section__lead" data-reveal>실습 주제는 <b>“내일 회의 자료를 준비하고 참석자에게 공유하기”</b>입니다. 일곱 단계를 따라 개념에서 시연, 실습, 적용까지 이어집니다.</p>
+
+      <div class="stages" role="table" aria-label="단계별 수업 개요">
+        <div class="stage stage--head" role="row">
+          <span class="stage__head" role="columnheader">단계</span>
+          <span class="stage__head" role="columnheader">주제</span>
+          <span class="stage__head" role="columnheader">주요 내용</span>
+          <span class="stage__head" role="columnheader">확인할 결과</span>
+        </div>
+        <div class="stage" role="row" data-reveal>
+          <span class="stage__no" role="cell">01</span>
+          <h4 role="cell">완성 결과 미리보기<small>Intro</small></h4>
+          <p class="stage__desc" role="cell">일정에서 회의자료와 메일 초안이 만들어지는 결과를 먼저 봅니다.</p>
+          <p class="stage__out" role="cell">내 업무와 연결되는 활용 장면</p>
+        </div>
+        <div class="stage" role="row" data-reveal>
+          <span class="stage__no" role="cell">02</span>
+          <h4 role="cell">개념 이해<small>Concept</small></h4>
+          <p class="stage__desc" role="cell">에이전트와 오케스트레이션, 역할 분담과 작업 순서를 이해합니다.</p>
+          <p class="stage__out" role="cell">전체 업무 흐름에 대한 이해</p>
+        </div>
+        <div class="stage" role="row" data-reveal>
+          <span class="stage__no" role="cell">03</span>
+          <h4 role="cell">기본 구조<small>Structure</small></h4>
+          <p class="stage__desc" role="cell">CLAUDE.md, .claude/rules, .claude/agents, 양식·원자료 폴더와 서비스 연결을 살펴봅니다.</p>
+          <p class="stage__out" role="cell">규칙·역할·양식·도구 연결의 구분</p>
+        </div>
+        <div class="stage is-key" role="row" data-reveal>
+          <span class="stage__no" role="cell">04</span>
+          <h4 role="cell">강사 전체 시연<small>Demo</small></h4>
+          <p class="stage__desc" role="cell">일정 조회 → 원자료 확인 → 양식 기반 작성 → 검수 → 메일 초안 → 확인 후 테스트 발송</p>
+          <p class="stage__out" role="cell">처음부터 끝까지 이어지는 실행 과정</p>
+        </div>
+        <div class="stage is-key" role="row" data-reveal>
+          <span class="stage__no" role="cell">05</span>
+          <h4 role="cell">수강생 실습<small>Practice</small></h4>
+          <p class="stage__desc" role="cell">규칙이나 양식 조건을 바꾸고 문서와 메일 초안을 직접 생성합니다.</p>
+          <p class="stage__out" role="cell">문서, 검수 결과, 메일 초안</p>
+        </div>
+        <div class="stage" role="row" data-reveal>
+          <span class="stage__no" role="cell">06</span>
+          <h4 role="cell">예외 상황과 검토<small>Review</small></h4>
+          <p class="stage__desc" role="cell">자료 누락, 일정 불일치, 수신자 미정, 중복 처리 문제를 확인합니다.</p>
+          <p class="stage__out" role="cell">사람이 판단해야 하는 항목</p>
+        </div>
+        <div class="stage" role="row" data-reveal>
+          <span class="stage__no" role="cell">07</span>
+          <h4 role="cell">적용 및 Q&amp;A<small>Apply</small></h4>
+          <p class="stage__desc" role="cell">내 반복 업무를 같은 구조로 나누어 보고 질문을 나눕니다.</p>
+          <p class="stage__out" role="cell">개인별 적용 과제 1개</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 설치 -->
+    <section class="section" id="install">
+      <div class="section__label"><span>04</span>Install</div>
+      <h2 class="section__title" data-lines>Claude Code 설치</h2>
+      <p class="section__lead" data-reveal>정품 macOS와 Windows 기준입니다. 쓰는 운영체제를 고른 뒤 <b>권장</b> 명령어 하나만 실행하면 됩니다.</p>
+
+      <div class="os-tabs" role="tablist" aria-label="운영체제 선택">
+        <span class="os-tabs__pill" aria-hidden="true"></span>
+        <button role="tab" id="tab-mac" aria-selected="true" aria-controls="panel-mac">macOS</button>
+        <button role="tab" id="tab-win" aria-selected="false" aria-controls="panel-win" tabindex="-1">Windows</button>
+      </div>
+
+      <div class="os-panel" id="panel-mac" role="tabpanel" aria-labelledby="tab-mac">
+        <div class="req"><span><b>OS</b> macOS 13.0 이상</span><span><b>RAM</b> 4GB 이상</span><span><b>터미널</b> 기본 Terminal 앱 (Zsh)</span></div>
+        <div class="cmds">
+          <div class="cmd">
+            <div class="cmd__top"><span class="cmd__title">기본 설치 (네이티브)<span class="rec">권장</span><small>백그라운드에서 자동 업데이트됩니다.</small></span><button class="copy" data-copy="curl -fsSL https://claude.ai/install.sh | bash">복사</button></div>
+            <pre><code><span class="p">$ </span>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+          </div>
+          <div class="cmd">
+            <div class="cmd__top"><span class="cmd__title">Homebrew로 설치<small>업데이트는 <code>brew upgrade claude-code</code>로 직접 합니다.</small></span><button class="copy" data-copy="brew install --cask claude-code">복사</button></div>
+            <pre><code><span class="p">$ </span>brew install --cask claude-code</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="os-panel" id="panel-win" role="tabpanel" aria-labelledby="tab-win" hidden>
+        <div class="req"><span><b>OS</b> Windows 10 (1809) 이상</span><span><b>RAM</b> 4GB 이상</span><span><b>권장</b> Git for Windows 사전 설치</span><span><b>관리자 권한</b> 필요 없음</span></div>
+        <div class="cmds">
+          <div class="cmd">
+            <div class="cmd__top"><span class="cmd__title">PowerShell<span class="rec">권장</span><small>프롬프트가 <code>PS C:\</code>로 시작하면 PowerShell입니다.</small></span><button class="copy" data-copy="irm https://claude.ai/install.ps1 | iex">복사</button></div>
+            <pre><code><span class="p">PS&gt; </span>irm https://claude.ai/install.ps1 | iex</code></pre>
+          </div>
+          <div class="cmd">
+            <div class="cmd__top"><span class="cmd__title">명령 프롬프트 (CMD)<small>프롬프트가 <code>C:\</code>로 시작하면 CMD입니다.</small></span><button class="copy" data-copy="curl -fsSL https://claude.ai/install.cmd -o install.cmd &amp;&amp; install.cmd &amp;&amp; del install.cmd">복사</button></div>
+            <pre><code><span class="p">&gt; </span>curl -fsSL https://claude.ai/install.cmd -o install.cmd &amp;&amp; install.cmd &amp;&amp; del install.cmd</code></pre>
+          </div>
+          <div class="cmd">
+            <div class="cmd__top"><span class="cmd__title">WinGet으로 설치<small>업데이트는 <code>winget upgrade Anthropic.ClaudeCode</code>로 직접 합니다.</small></span><button class="copy" data-copy="winget install Anthropic.ClaudeCode">복사</button></div>
+            <pre><code><span class="p">PS&gt; </span>winget install Anthropic.ClaudeCode</code></pre>
+          </div>
+        </div>
+        <p class="note">Git for Windows를 설치해 두면 Claude Code가 Bash 도구를 쓸 수 있습니다. PowerShell에서 <code>&amp;&amp;</code> 오류가 나거나 CMD에서 <code>'irm'</code> 오류가 나면, 지금 쓰는 셸에 맞는 명령어로 바꿔 실행하세요.</p>
+      </div>
+
+      <div class="after">
+        <div class="block" data-reveal><span class="block__en">Verify</span><h4>설치 확인</h4><p>버전이 출력되면 설치 완료입니다.</p><pre><code>claude --version</code></pre></div>
+        <div class="block" data-reveal><span class="block__en">Diagnose</span><h4>상태 점검</h4><p>문제가 있을 때 설치 상태를 진단합니다.</p><pre><code>claude doctor</code></pre></div>
+        <div class="block" data-reveal><span class="block__en">Start</span><h4>시작 · 로그인</h4><p>프로젝트 폴더에서 실행하고 브라우저 안내에 따라 로그인합니다.</p><pre><code>cd 내-프로젝트
+claude</code></pre></div>
+      </div>
+      <p class="note">Claude Code는 Pro, Max, Team, Enterprise 또는 Console 계정이 필요합니다. 무료 플랜에는 포함되지 않습니다. 출처: <a href="https://code.claude.com/docs/en/setup" target="_blank" rel="noopener">Claude Code 공식 설치 문서</a></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__msg" data-lines>AI에게 일을 잘 맡기려면, 목표만큼 기준도 구체적이어야 합니다.</p>
+    <p class="footer__flow" data-reveal><b>입력 자료</b> → <b>담당 역할</b> → <b>실행 순서</b> → <b>산출물</b> → <b>검토 기준</b></p>
+    <div class="footer__mark split-line" aria-hidden="true"><span class="foot-word">Orchestrate</span><span class="foot-word">©2026</span></div>
+    <div class="footer__bottom"><span>AI 에이전트 오케스트레이션 수업 교안</span><span>대전지점 김가경 강사</span></div>
+  </footer>
+
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+  <script src="vendor/SplitText.min.js"></script>
+  <script src="vendor/lenis.min.js"></script>
+  <script>
+    (() => {
+      /* ---- 설치 탭 · 복사 버튼 (애니메이션과 무관하게 항상 동작) ---- */
+      const tabs = [...document.querySelectorAll('.os-tabs [role="tab"]')];
+      const pill = document.querySelector('.os-tabs__pill');
+      const movePill = (btn) => {
+        pill.style.width = btn.offsetWidth + 'px';
+        pill.style.transform = `translateX(${btn.offsetLeft - 4}px)`;
+      };
+      const selectTab = (btn) => {
+        tabs.forEach((t) => {
+          const on = t === btn;
+          t.setAttribute('aria-selected', on);
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+        movePill(btn);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      };
+      tabs.forEach((t, i) => {
+        t.addEventListener('click', () => selectTab(t));
+        t.addEventListener('keydown', (e) => {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+          selectTab(next); next.focus();
+        });
+      });
+      if (/Win/i.test(navigator.platform || navigator.userAgent)) selectTab(tabs[1]);
+      document.fonts.ready.then(() => movePill(tabs.find((t) => t.getAttribute('aria-selected') === 'true')));
+      window.addEventListener('resize', () => movePill(tabs.find((t) => t.getAttribute('aria-selected') === 'true')));
+
+      document.querySelectorAll('.copy').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(btn.dataset.copy); btn.textContent = '복사됨'; }
+          catch { btn.textContent = '직접 복사'; }
+          btn.classList.add('is-done');
+          setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('is-done'); }, 1600);
+        });
+      });
+
+      /* ---- 애니메이션 ---- */
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !window.gsap) return;
+
+      gsap.registerPlugin(ScrollTrigger, SplitText);
+      // 새로고침해도 스플래시부터 다시 보이도록 맨 위에서 시작
+      history.scrollRestoration = 'manual';
+      window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
+
+      // 부드러운 스크롤 (Lenis) + ScrollTrigger 동기화
+      const lenis = new Lenis({ lerp: 0.1 });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault(); lenis.scrollTo(target, { duration: 1.4 });
+      }));
+
+      gsap.to('.progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: 0.3 } });
+
+      // 줄 분할 전에 제목 폰트(Paperlogy)를 확실히 로드해 줄바꿈 위치가 어긋나지 않게 함
+      Promise.all([
+        document.fonts.load('800 40px Paperlogy', '가'),
+        document.fonts.load('600 40px Paperlogy', '가')
+      ]).catch(() => {}).then(() => document.fonts.ready).then(() => {
+        // 스플래시 카운터 → 커튼 → 히어로 글자 상승 (finenuts 첫 배너 연출 참고)
+        lenis.scrollTo(0, { immediate: true, force: true });
+        lenis.stop();
+        const heroChars = SplitText.create('.hero__word', { type: 'words,chars', mask: 'chars' }).chars;
+        gsap.set(heroChars, { yPercent: 110 });
+        gsap.set(['.hero__meta > div', '.hero__kicker', '.hero__scroll', '.header'], { autoAlpha: 0, y: 16 });
+
+        const count = { v: 0 };
+        const counter = document.querySelector('.splash__count');
+        gsap.timeline()
+          .to(count, { v: 100, duration: 1.6, ease: 'power2.inOut', onUpdate: () => { counter.textContent = String(Math.round(count.v)).padStart(3, '0'); } })
+          .to('.splash__bar', { scaleX: 1, duration: 1.6, ease: 'power2.inOut' }, 0)
+          .to('.splash', { yPercent: -100, duration: 1, ease: 'expo.inOut' }, '+=0.15')
+          .to(heroChars, { yPercent: 0, duration: 1.2, ease: 'expo.out', stagger: 0.035 }, '-=0.45')
+          .to(['.header', '.hero__meta > div', '.hero__kicker', '.hero__scroll'], { autoAlpha: 1, y: 0, duration: .8, ease: 'power3.out', stagger: .08 }, '-=0.9')
+          .add(() => { document.querySelector('.splash').remove(); lenis.start(); });
+
+        // 히어로: 스크롤 시 타이틀이 위로 밀려나는 패럴랙스
+        gsap.to('.hero__title', { yPercent: -35, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+        gsap.to(['.hero__meta', '.hero__kicker'], { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '40% top', scrub: true } });
+
+        // 온보딩: 문장이 스크롤에 따라 단어 단위로 밝아짐
+        document.querySelectorAll('[data-scrub]').forEach((el) => {
+          const words = SplitText.create(el, { type: 'words' }).words;
+          gsap.fromTo(words, { opacity: .15 }, { opacity: 1, stagger: .1, ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top 80%', end: 'bottom 45%', scrub: true } });
+        });
+        gsap.from('.onboard__head', { yPercent: 60, autoAlpha: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.onboard', start: 'top 75%' } });
+
+        // 제목: 줄 단위 마스크 상승
+        document.querySelectorAll('[data-lines]').forEach((el) => {
+          SplitText.create(el, {
+            type: 'lines', mask: 'lines', autoSplit: true,
+            onSplit: (self) => gsap.from(self.lines, { yPercent: 105, duration: 1.1, ease: 'expo.out', stagger: .1, scrollTrigger: { trigger: el, start: 'top 85%', once: true } })
+          });
+        });
+
+        // 일반 요소: 아래에서 페이드 업 (같은 높이에 있는 요소끼리 순차)
+        gsap.set('[data-reveal]', { autoAlpha: 0 });
+        ScrollTrigger.batch('[data-reveal]', {
+          start: 'top 88%', once: true,
+          onEnter: (els) => gsap.fromTo(els, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out', stagger: .09, overwrite: true })
+        });
+
+        // 강사 사진: 커버가 걷히며 이미지 줌아웃
+        const cover = document.querySelector('.instructor__photo .cover');
+        cover.hidden = false;
+        gsap.timeline({ scrollTrigger: { trigger: '.instructor__photo', start: 'top 80%' } })
+          .to(cover, { scaleY: 0, duration: 1.2, ease: 'expo.inOut' })
+          .to('.instructor__photo img', { scale: 1, duration: 1.6, ease: 'expo.out' }, '-=0.7');
+
+        // 루프 라인 드로잉
+        gsap.from('.loop__fill', { scaleX: 0, ease: 'none', scrollTrigger: { trigger: '.loop', start: 'top 80%', end: 'bottom 55%', scrub: true } });
+
+        // 푸터 워드마크
+        const footChars = SplitText.create('.foot-word', { type: 'words,chars', mask: 'chars' }).chars;
+        gsap.from(footChars, { yPercent: 110, duration: 1.2, ease: 'expo.out', stagger: .03, scrollTrigger: { trigger: '.footer__mark', start: 'top 92%' } });
+
+        ScrollTrigger.refresh();
+      });
+    })();
+  </script>
+</body>
+</html>
